@@ -1,0 +1,23 @@
+require('dotenv').config();
+const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const Redis = require('ioredis');
+const connectDB = require('./lib/db');
+const authRoutes = require('./routes/auth');
+const behavioralRoutes = require('./routes/behavioral');
+const { register } = require('./lib/metrics');
+const app = express();
+app.use(cors());
+app.use(bodyParser.json());
+const redis = new Redis(process.env.REDIS_URL);
+app.set('redis', redis);
+connectDB();
+app.use('/auth', authRoutes);
+app.use('/behavior', behavioralRoutes);
+app.get('/metrics', async (req, res) => {
+  res.set('Content-Type', register.contentType);
+  res.end(await register.metrics());
+});
+const port = process.env.PORT || 4000;
+app.listen(port, () => console.log(`ZTAE backend listening on ${port}`));
