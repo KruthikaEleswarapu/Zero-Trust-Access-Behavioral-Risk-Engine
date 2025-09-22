@@ -1,64 +1,35 @@
-version: '3.8'
+version: "3.9"
+
 services:
-  mongo:
-    image: mongo:6
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo-data:/data/db
-
-  redis:
-    image: redis:7
-    ports: ["6379:6379"]
-
-  anomaly:
-    build: ./anomaly-service
-    volumes:
-      - ./anomaly-service:/app
-    environment:
-      - MODEL_PATH=/app/if_model.joblib
-    ports: ["5000:5000"]
-
   backend:
     build: ./backend
-    volumes:
-      - ./backend:/app
-    environment:
-      - PORT=4000
-      - REDIS_URL=redis://redis:6379
-      - MONGO_URL=mongodb://mongo:27017/ztae
-      - ANOMALY_SERVICE_URL=http://anomaly:5000/score
+    container_name: ztae-backend
+    ports:
+      - "5000:5000"
     depends_on:
-      - mongo
-      - redis
-      - anomaly
-    ports: ["4000:4000"]
+      - mongodb
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/ztae_db
+    restart: always
 
   frontend:
     build: ./frontend
-    volumes:
-      - ./frontend:/app
-    environment:
-      - REACT_APP_API_BASE=http://localhost:4000
+    container_name: ztae-frontend
+    ports:
+      - "3000:3000"
     depends_on:
       - backend
-    ports: ["3000:80"]
+    restart: always
 
-  prometheus:
-    image: prom/prometheus
+  mongodb:
+    image: mongo:6
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    command: ["--wiredTigerCacheSizeGB", "0.25"]  # limit memory for PWD
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-    ports:
-      - "9090:9090"
-
-  grafana:
-    image: grafana/grafana
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-    ports:
-      - "3001:3000"
-    depends_on:
-      - prometheus
+      - mongo_data:/data/db
+    restart: always
 
 volumes:
-  mongo-data:
+  mongo_data:
