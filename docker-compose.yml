@@ -9,7 +9,8 @@ services:
     depends_on:
       - mongodb
     environment:
-      - MONGO_URI=mongodb://mongodb:27017/ztae_db
+      - MONGO_URI=mongodb+srv://kruthikaeleswarapu_db_user:HuFcA1e3Z9akreSB@cluster0.2cf8ona.mongodb.net/zerotrust?retryWrites=true&w=majority
+
     restart: always
 
   frontend:
