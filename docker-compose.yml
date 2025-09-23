@@ -5,32 +5,20 @@ services:
     build: ./backend
     container_name: ztae-backend
     ports:
-      - "5000:5000"
-    depends_on:
-      - mongodb
+      - "4000:4000"
     environment:
       - MONGO_URI=mongodb+srv://kruthikaeleswarapu_db_user:HuFcA1e3Z9akreSB@cluster0.2cf8ona.mongodb.net/zerotrust?retryWrites=true&w=majority
-
+      - TWILIO_SID=your_twilio_sid
+      - TWILIO_TOKEN=your_twilio_token
+      - TWILIO_FROM=+your_verified_number
+      - ANOMALY_SERVICE_URL=http://anomaly:5000/score
     restart: always
 
   frontend:
     build: ./frontend
     container_name: ztae-frontend
     ports:
-      - "3000:3000"
+      - "3000:80"   # host:container → http://localhost:3000
     depends_on:
       - backend
     restart: always
-
-  mongodb:
-    image: mongo:6
-    container_name: mongodb
-    ports:
-      - "27017:27017"
-    command: ["--wiredTigerCacheSizeGB", "0.25"]  # limit memory for PWD
-    volumes:
-      - mongo_data:/data/db
-    restart: always
-
-volumes:
-  mongo_data:
